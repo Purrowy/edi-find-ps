@@ -15,35 +15,37 @@ $date = Get-Date -Format "yyyy-MM-dd"
 $logFile = "$PSScriptRoot\log_$date.txt"
 
 # define keywords to search for
-$keywords = @("AA", "GH");
-$loop_count = 0
+$keywords = @("UNB+", "AB", "GH", "UNZ+");
 
 # loop through each file and check for keywords
 foreach ($file in $files) {
 
+    $log_entry = @()
+    $log_entry += "File: $file`n***"
+
     # replace ' with newline
-    $temp0 = Get-Content $file -Raw
-    $temp = $temp0 -replace "'", [Environment]::NewLine
-    $loop_count
-    $loop_count ++
-    Write-Output Get-Content $temp
-    $file
+    $content = Get-Content $file -Raw
+    $temp = $content -replace "'", [Environment]::NewLine
+    $lines = $temp -split [Environment]::NewLine
 
     foreach ($keyword in $keywords) {
-        $results = Get-Content $temp | Select-String -Pattern $keyword
-        Write-Output $results
-    }
-
-    }
-
-
-
-
-<#     "File: $($file)" | Out-File -FilePath $logFile -Append
-    foreach ($keyword in $keywords) {
-        $results = Get-Content $file | Select-String -Pattern $keyword
+        $results = $lines | Select-String -Pattern $keyword
         if ($results) {
-            $results | Out-File -FilePath $logFile -Append
+
+            # check for exceptions
+            if ($keyword -eq "UNB+") {
+                $log_entry += "$results`n-----"
+            }
+            elseif ($keyword -eq "UNZ+") {
+                $log_entry += "-----`n$results`n"
+            } 
+            else {
+                $log_entry += "$results"
+            }
+            
         }
     }
-    "----------" | Out-File -FilePath $logFile -Append #>
+
+    $log_entry | Out-File -FilePath $logFile -Append
+
+    }
