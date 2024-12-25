@@ -1,21 +1,30 @@
-# Create list of files to check based on args given by user
-param([Parameter(ValueFromRemainingArguments=$true)]$args)
-$files = @()
-
-if ($args.Count -eq 0) {
-    $files = Get-ChildItem -Path (Get-Location) -File | Select-Object -ExpandProperty FullName
-}
-
-else {
-    $files = $args
-}
-
 # log file settings
-$date = Get-Date -Format "yyyy-MM-dd"
-$logFile = "$PSScriptRoot\log_$date.txt"
+$logFile = "$PSScriptRoot\log_$(Get-Date -Format "yyyy-MM-dd").txt"
 
 # define keywords to search for
 $keywords = @("UNB+", "AB", "GH", "UNZ+");
+
+# Create list of files to check based on args given by user
+function get_file_list {
+    param (
+        [Parameter(ValueFromRemainingArguments = $true)]
+        [string[]]$args
+    )
+
+    $files = @()
+
+    if ($args.Count -eq 0) {
+        $files = Get-ChildItem -Path (Get-Location) -File | Select-Object -ExpandProperty FullName
+    }
+
+    else {
+        $files = $args
+    }
+    
+    return $files
+}
+
+$files = get_file_list @args
 
 # loop through each file and check for keywords
 foreach ($file in $files) {
