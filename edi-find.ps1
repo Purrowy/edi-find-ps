@@ -3,7 +3,7 @@ param([Parameter(ValueFromRemainingArguments=$true)]$args)
 $files = @()
 
 if ($args.Count -eq 0) {
-    $files = Get-ChildItem -Path $PSScriptRoot -File | Select-Object -ExpandProperty FullName
+    $files = Get-ChildItem -Path (Get-Location) -File | Select-Object -ExpandProperty FullName
 }
 
 else {
