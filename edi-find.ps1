@@ -12,7 +12,7 @@ function main {
     $files = GetFileList @args
     
     foreach ($file in $files) {
-        if (ValidateFile $file) {
+        if (ValidateFile) {
             CreateLogEntry $file
         }
     }
@@ -71,6 +71,10 @@ function ValidateFile {
 }
 
 function CreateLogEntry {
+    param (
+		[string]$file,
+        [switch]$ReturnLogFile
+	)
 
     $log_entry = @("File: $file", "***")
 
@@ -91,8 +95,14 @@ function CreateLogEntry {
             }                
         }
     }
-        $log_entry | Out-File -FilePath $logFile -Append
-        return
+    
+    $log_entry | Out-File -FilePath $logFile -Append
+
+    if ($ReturnLogFile) {
+        return Get-Content $logFile
+    }
 }
 
-main @args
+if ($MyInvocation.InvocationName -ne '.') {
+    main @args
+}
