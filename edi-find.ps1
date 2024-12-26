@@ -20,15 +20,31 @@ function main {
 
 # Create list of files to check based on args given by user
 function GetFileList {
+    param (
+        [string[]]$Paths
+    )
+
+    # If no arguments provided by user -> check all files from current directory
+    if (-not $Paths) {
+        $Paths = (Get-Location).Path
+    }
 
     $list = @()
 
-    if ($args.Count -eq 0) {
-        $list = Get-ChildItem -Path (Get-Location) -File | Select-Object -ExpandProperty FullName
+    foreach ($path in $Paths) {
+        $resolvedPaths = Resolve-Path -Path $path -ErrorAction SilentlyContinue
+
+        foreach ($resolvedPath in $resolvedPaths) {
+            # if provided argument is a dir
+            if (Test-Path -Path $resolvedPath -PathType Container) {
+                $list += Get-ChildItem -Path $resolvedPath -File | Select-Object -ExpandProperty FullName
+            }
+            # if provided argument is a file
+            elseif (Test-Path -Path $resolvedPath -PathType Leaf) {
+                $list += $resolvedPath
+            }
+        }
     }
-    else {
-        $list = $args
-    }  
 
     return $list
 }
