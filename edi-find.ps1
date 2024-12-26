@@ -3,7 +3,7 @@
 $logFile = "$(Get-Location)\log_$(Get-Date -Format "yyyy-MM-dd").txt" # save log in current dir
 
 # define keywords to search for
-$keywords = @("UNB+", "AB", "GH", "UNZ+");
+$keywords = @("UNB+", "UNH+", "BGM+", "NAD+BY", "NAD+SE", "NAD+IV", "NAD+DP", "NAD+CN", "UNZ+");
 $extensions = @(".txt", ".edi")
 
 # basic logic for this script
