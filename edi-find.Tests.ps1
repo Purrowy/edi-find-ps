@@ -20,3 +20,10 @@ Describe "ValidateFile" {
         ValidateFile $file | Should -Be $true
     }
 }
+
+Describe "GetFileList" {
+    It "should return a list of all files in working folder with no arguments provided" {
+        Set-Location $PSScriptRoot\test_files
+        GetFileList | Should -Contain "*test_file.edi"
+    }
+}
