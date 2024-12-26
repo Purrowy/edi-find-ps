@@ -12,8 +12,8 @@ function main {
     $files = GetFileList @args
     
     foreach ($file in $files) {
-        if (ValidateFile $file) {
-            CreateLogEntry $file
+        if (ValidateFile) {
+            CreateLogEntry
         }
     }
 }
