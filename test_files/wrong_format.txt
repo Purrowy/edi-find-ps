@@ -1,0 +1,2 @@
+this does not have any edi segments to validate
+'and 'should not be 'included 'in final log
