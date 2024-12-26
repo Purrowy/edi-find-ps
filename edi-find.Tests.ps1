@@ -33,4 +33,10 @@ Describe "GetFileList" {
         $resultFilenames | Should -HaveCount 3
         $resultFilenames | Should -Be $expected
     }
+    It "should return a list with one file specified in argument" {
+        $testPath = Join-Path $PSScriptRoot "test_files" "test_file.edi"
+        $result = GetFileList -Paths $testPath
+        
+        $result | Split-Path -Leaf | Should -Be "test_file.edi"
+    }
 }
