@@ -23,7 +23,14 @@ Describe "ValidateFile" {
 
 Describe "GetFileList" {
     It "should return a list of all files in working folder with no arguments provided" {
+        
+        $expected = @("test_file.edi", "wrong_extension.xml", "wrong_format.txt")
+
         Set-Location $PSScriptRoot\test_files
-        GetFileList | Should -Contain "*test_file.edi"
+        $result = GetFileList
+        $resultFilenames = $result | Split-Path -Leaf
+
+        $resultFilenames | Should -HaveCount 3
+        $resultFilenames | Should -Be $expected
     }
 }
