@@ -3,7 +3,7 @@
 $logFile = "$(Get-Location)\log_$(Get-Date -Format "yyyy-MM-dd").txt" # save log in current dir
 
 # define keywords to search for
-$keywords = @("UNB+", "UNH+", "BGM+", "NAD+BY", "NAD+SE", "NAD+IV", "NAD+DP", "NAD+CN", "UNZ+");
+$keywords = @("UNB\+", "UNH\+", "BGM\+", "NAD\+BY", "NAD\+SE", "NAD\+IV", "NAD\+DP", "NAD\+CN", "UNZ\+");
 $extensions = @(".txt", ".edi")
 
 # basic logic for this script
@@ -80,10 +80,10 @@ function CreateLogEntry {
         $results = $content | Select-String -Pattern $keyword
         if ($results){
             # check for exceptions
-            if ($keyword -eq "UNB+") {
+            if ($keyword -eq "UNB\+") {
                 $log_entry += "$results`n-----"
             }
-            elseif ($keyword -eq "UNZ+") {
+            elseif ($keyword -eq "UNZ\+") {
                 $log_entry += "-----`n$results`n***`n"
             } 
             else {
