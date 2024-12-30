@@ -9,12 +9,12 @@ $extensions = @(".txt", ".edi")
 
 # basic logic for this script
 function main {
-
-    $files = GetFileList @args
+    
+    $files = GetFileList -Paths $args
     
     foreach ($file in $files) {
-        if (ValidateFile) {
-            CreateLogEntry
+        if (ValidateFile -file $file) {
+            CreateLogEntry -file $file
             $logFile_is_empty = $false
         }
     }
@@ -59,11 +59,9 @@ function GetFileList {
 }
 
 function ValidateFile {
-
-    if (-not (Test-Path $file)) {
-        Write-Host "Error - $($file): file doesn't exist. File will not be included in final log."
-        return $false
-    }
+    param (
+        [string]$file
+    )
 
     if (-not ($([System.IO.Path]::GetExtension($file)) -in $extensions)) {
         Write-Host "Error - $($file): incorrect file extension. File will not be included in final log."
@@ -80,6 +78,9 @@ function ValidateFile {
 }
 
 function CreateLogEntry {
+    param (
+        [string]$file
+    )
 
     $log_entry = @("File: $file", "***")
 
