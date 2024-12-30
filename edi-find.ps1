@@ -13,6 +13,9 @@ function main {
     $files = GetFileList @args
     
     foreach ($file in $files) {
+        if ((Test-Path -Path $file -PathType Container) -or ($file -like "*`**")) {
+            continue
+        }
         if (ValidateFile) {
             CreateLogEntry
             $logFile_is_empty = $false
@@ -41,17 +44,17 @@ function GetFileList {
     $list = @()
 
     foreach ($path in $Paths) {
-        $resolvedPaths = Resolve-Path -Path $path -ErrorAction SilentlyContinue
-
-        foreach ($resolvedPath in $resolvedPaths) {
-            # if provided argument is a dir
-            if (Test-Path -Path $resolvedPath -PathType Container) {
-                $list += Get-ChildItem -Path $resolvedPath -File | Select-Object -ExpandProperty FullName
-            }
-            # if provided argument is a file
-            elseif (Test-Path -Path $resolvedPath -PathType Leaf) {
-                $list += $resolvedPath
-            }
+        if ($path -like "*`**") {
+            $baseDir = Split-Path -Path $path
+            if (-not $baseDir) { $baseDir = "."}
+            $list += Get-ChildItem -Path $baseDir -File -Recurse | Select-Object -ExpandProperty FullName
+        }
+        if (Test-Path -Path $path -PathType Container) {
+            $list += Get-ChildItem -Path $path | Select-Object -ExpandProperty FullName
+        }
+        else {
+            # handle non-existing files
+            $list += $path
         }
     }
 
