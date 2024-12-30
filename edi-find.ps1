@@ -13,7 +13,7 @@ function main {
     $files = GetFileList @args
     
     foreach ($file in $files) {
-        if ((Test-Path -Path $file -PathType Container) -or ($file -like "*`**")) {
+        if (Test-Path -Path $file -PathType Container) {
             continue
         }
         if (ValidateFile) {
@@ -44,13 +44,16 @@ function GetFileList {
     $list = @()
 
     foreach ($path in $Paths) {
+        
         if ($path -like "*`**") {
             $baseDir = Split-Path -Path $path
             if (-not $baseDir) { $baseDir = "."}
-            $list += Get-ChildItem -Path $baseDir -File -Recurse | Select-Object -ExpandProperty FullName
+            $filesf = Get-ChildItem -Path $baseDir -File -Recurse | Select-Object -ExpandProperty FullName
+            $list += $filesf
         }
-        if (Test-Path -Path $path -PathType Container) {
-            $list += Get-ChildItem -Path $path | Select-Object -ExpandProperty FullName
+        elseif (Test-Path -Path $path -PathType Container) {
+            $filesf = Get-ChildItem -Path $path -File | Select-Object -ExpandProperty FullName
+            $list += $filesf
         }
         else {
             # handle non-existing files
