@@ -1,6 +1,7 @@
 # log file settings
 #$logFile = "$PSScriptRoot\log_$(Get-Date -Format "yyyy-MM-dd").txt" # save log in script's location
 $logFile = "$(Get-Location)\log_$(Get-Date -Format "yyyy-MM-dd").txt" # save log in current dir
+$logFile_is_empty = $true
 
 # define keywords to search for
 $keywords = @("UNB\+", "UNH\+", "BGM\+", "NAD\+BY", "NAD\+SE", "NAD\+IV", "NAD\+DP", "NAD\+CN", "UNZ\+");
@@ -14,7 +15,15 @@ function main {
     foreach ($file in $files) {
         if (ValidateFile) {
             CreateLogEntry
+            $logFile_is_empty = $false
         }
+    }
+
+    if (-not ($logFile_is_empty)) {
+        Write-Host "Script finished. Log created under '$(Get-Location)\log_$(Get-Date -Format "yyyy-MM-dd").txt'"
+    }
+    else {
+        Write-Host "Script finished. No files to check were found."
     }
 }
 
@@ -52,17 +61,17 @@ function GetFileList {
 function ValidateFile {
 
     if (-not (Test-Path $file)) {
-        Write-Host "$($file): file doesn't exist"
+        Write-Host "Error - $($file): file doesn't exist. File will not be included in final log."
         return $false
     }
 
     if (-not ($([System.IO.Path]::GetExtension($file)) -in $extensions)) {
-        Write-Host "$($file): incorrect file extension"
+        Write-Host "Error - $($file): incorrect file extension. File will not be included in final log."
         return $false
     }
 
     if (-not (Select-String $file -Pattern "UNB+" -Quiet)) {
-        Write-Host "$($file): wrong format"
+        Write-Host "Error - $($file): wrong format. File will not be included in final log."
         return $false
     }
 
