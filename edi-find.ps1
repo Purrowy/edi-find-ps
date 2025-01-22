@@ -84,8 +84,8 @@ function CreateLogEntry {
 
     $log_entry = @("File: $file", "***")
 
-    Get-Content $file | ForEach-Object {
-        $line = $_
+    (Get-Content $file -Raw) -split "'" | ForEach-Object {
+        $line = $_.Trim()
         foreach ($keyword in $keywords) {
             if ($line -match $keyword) {
                 if ($keyword -eq "UNH\+") {
