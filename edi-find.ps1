@@ -84,25 +84,28 @@ function CreateLogEntry {
 
     $log_entry = @("File: $file", "***")
 
-    $content = (Get-Content $file -Raw) -split "'"
-
-    foreach ($keyword in $keywords) {
-        $results = $content | Select-String -Pattern $keyword
-        if ($results){
-            # check for exceptions
-            if ($keyword -eq "UNB\+") {
-                $log_entry += "$results`n-----"
+    Get-Content $file | ForEach-Object {
+        $line = $_
+        foreach ($keyword in $keywords) {
+            if ($line -match $keyword) {
+                if ($keyword -eq "UNH\+") {
+                    $log_entry += "----------------------`n$line"
+                    break
+                }
+                elseif ($keyword -eq "UNZ\+") {
+                    $log_entry += "----------------------`n$line`n***`n"
+                    break
+                }
+                else {                
+                    $log_entry += "$line"
+                    break
+                }
             }
-            elseif ($keyword -eq "UNZ\+") {
-                $log_entry += "-----`n$results`n***`n"
-            } 
-            else {
-                $log_entry += "$results"
-            }                
         }
     }
-        $log_entry | Out-File -FilePath $logFile -Append
-        return
+
+    $log_entry | Out-File -FilePath $logFile -Append
+    return
 }
 
 main @args
