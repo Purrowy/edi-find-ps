@@ -1,11 +1,11 @@
 # log file settings
-#$logFile = "$PSScriptRoot\log_$(Get-Date -Format "yyyy-MM-dd").txt" # save log in script's location
-$logFile = "$(Get-Location)\log_$(Get-Date -Format "yyyy-MM-dd").txt" # save log in current dir
+$logFile = "$PSScriptRoot\log_$(Get-Date -Format "yyyy-MM-dd").txt" # save log in script's location
+#$logFile = "$(Get-Location)\log_$(Get-Date -Format "yyyy-MM-dd").txt" # save log in current dir
 $logFile_is_empty = $true
 
 # define keywords to search for
 $keywords = @("UNB\+", "UNH\+", "BGM\+", "NAD\+BY", "NAD\+SE", "NAD\+IV", "NAD\+DP", "NAD\+CN", "UNZ\+");
-$extensions = @(".txt", ".edi")
+$extensions = @("*.txt", ".edi")
 
 # basic logic for this script
 function main {
@@ -41,17 +41,18 @@ function GetFileList {
     $list = @()
 
     foreach ($path in $Paths) {
-        $resolvedPaths = Resolve-Path -Path $path -ErrorAction SilentlyContinue
-
-        foreach ($resolvedPath in $resolvedPaths) {
-            # if provided argument is a dir
+        try {
+            $resolvedPath = Resolve-Path -Path $path -ErrorAction SilentlyContinue
             if (Test-Path -Path $resolvedPath -PathType Container) {
-                $list += Get-ChildItem -Path $resolvedPath -File | Select-Object -ExpandProperty FullName
+                $list += Get-ChildItem -Path $resolvedPath -File -Include $extensions | Select-Object -ExpandProperty FullName
             }
-            # if provided argument is a file
             elseif (Test-Path -Path $resolvedPath -PathType Leaf) {
                 $list += $resolvedPath
             }
+        }
+
+        catch {
+            Write-Host "Error for: $path"
         }
     }
 
@@ -68,7 +69,7 @@ function ValidateFile {
         return $false
     }
 
-    if (-not (Select-String $file -Pattern "UNB+" -Quiet)) {
+    if (-not (Select-String $file -Pattern "UNB\+" -Quiet)) {
         Write-Host "Error - $($file): wrong format. File will not be included in final log."
         return $false
     }
