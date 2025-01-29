@@ -15,7 +15,9 @@ $extensions = @(".txt", ".edi")
 
 function main {
     
-    $files = GetFileList -Paths $Paths
+    # $files = GetFileList -Paths $Paths
+
+    $files = Get-ChildItem -Path $Paths -File | Select-Object -ExpandProperty FullName
     
     foreach ($file in $files) {
         if (ValidateFile -file $file) {
@@ -30,37 +32,6 @@ function main {
     else {
         Write-Host "Script finished. No files to check were found."
     }
-}
-
-# Get list of files based on user input
-function GetFileList {
-    param (
-        [string[]]$Paths
-    )
-
-    $list = @()
-
-    foreach ($path in $Paths) {
-        try {
-            $resolvedPath = Resolve-Path -Path $path -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Path
-            if (-not $resolvedPath) {
-                Write-Host "Path $path not found"
-                continue
-            }
-            if (Test-Path -Path $resolvedPath -PathType Container) {
-                $list += Get-ChildItem -Path $resolvedPath -File | Select-Object -ExpandProperty FullName
-            }
-            elseif (Test-Path -Path $resolvedPath -PathType Leaf) {
-                $list += $resolvedPath
-            }
-        }
-
-        catch {
-            Write-Host "Error for: $path"
-        }
-    }
-
-    return $list
 }
 
 # Check for extensions and if contains mandatory segment
