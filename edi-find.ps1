@@ -1,50 +1,54 @@
-# log file settings
+# If user calls script with no arguments - use current dir
+[CmdletBinding()]
+param (
+    [Parameter(ValueFromRemainingArguments)]
+    [string[]]$Paths = @((Get-Location).Path)
+)
+
+# Log file settings
 $logFile = "$PSScriptRoot\log_$(Get-Date -Format "yyyy-MM-dd").txt" # save log in script's location
 #$logFile = "$(Get-Location)\log_$(Get-Date -Format "yyyy-MM-dd").txt" # save log in current dir
-$logFile_is_empty = $true
 
-# define keywords to search for
+# Define keywords to search for
 $keywords = @("UNB\+", "UNH\+", "BGM\+", "NAD\+BY", "NAD\+SE", "NAD\+IV", "NAD\+DP", "NAD\+CN", "UNZ\+");
-$extensions = @("*.txt", ".edi")
+$extensions = @(".txt", ".edi")
 
-# basic logic for this script
 function main {
     
-    $files = GetFileList -Paths $args
+    $files = GetFileList -Paths $Paths
     
     foreach ($file in $files) {
         if (ValidateFile -file $file) {
             CreateLogEntry -file $file
-            $logFile_is_empty = $false
+            $createLog = $true
         }
     }
 
-    if (-not ($logFile_is_empty)) {
-        Write-Host "Script finished. Log created under '$(Get-Location)\log_$(Get-Date -Format "yyyy-MM-dd").txt'"
+    if ($createLog) {
+        Write-Host "Script finished. Log created under $logFile"
     }
     else {
         Write-Host "Script finished. No files to check were found."
     }
 }
 
-# Create list of files to check based on args given by user
+# Get list of files based on user input
 function GetFileList {
     param (
         [string[]]$Paths
     )
 
-    # If no arguments provided by user -> check all files from current directory
-    if (-not $Paths) {
-        $Paths = (Get-Location).Path
-    }
-
     $list = @()
 
     foreach ($path in $Paths) {
         try {
-            $resolvedPath = Resolve-Path -Path $path -ErrorAction SilentlyContinue
+            $resolvedPath = Resolve-Path -Path $path -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Path
+            if (-not $resolvedPath) {
+                Write-Host "Path $path not found"
+                continue
+            }
             if (Test-Path -Path $resolvedPath -PathType Container) {
-                $list += Get-ChildItem -Path $resolvedPath -File -Include $extensions | Select-Object -ExpandProperty FullName
+                $list += Get-ChildItem -Path $resolvedPath -File | Select-Object -ExpandProperty FullName
             }
             elseif (Test-Path -Path $resolvedPath -PathType Leaf) {
                 $list += $resolvedPath
@@ -59,6 +63,7 @@ function GetFileList {
     return $list
 }
 
+# Check for extensions and if contains mandatory segment
 function ValidateFile {
     param (
         [string]$file
@@ -85,6 +90,7 @@ function CreateLogEntry {
 
     $log_entry = @("File: $file", "***")
 
+    # search line by line, EDIFACT segments are split by '
     (Get-Content $file -Raw) -split "'" | ForEach-Object {
         $line = $_.Trim()
         foreach ($keyword in $keywords) {
@@ -109,4 +115,4 @@ function CreateLogEntry {
     return
 }
 
-main @args
+main
