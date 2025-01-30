@@ -62,7 +62,7 @@ function CreateLogEntry {
     $log_entry = @("File: $file", "***")
 
     # search line by line, EDIFACT segments are split by '
-    (Get-Content $file -Raw) -split "'" | ForEach-Object {
+    (Get-Content $file -Raw -Encoding UTF8) -split "'" | ForEach-Object {
         $line = $_.Trim()
         foreach ($keyword in $keywords) {
             if ($line -match $keyword) {
